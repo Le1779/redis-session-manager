@@ -1,4 +1,4 @@
-﻿using System.Web;
+﻿using DynaFlowWeb.Web.Filter;
 using System.Web.Mvc;
 
 namespace WebServer1
@@ -8,6 +8,7 @@ namespace WebServer1
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
+            filters.Add(new DynacwAuthenticationFilter());
         }
     }
 }
