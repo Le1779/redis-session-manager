@@ -1,5 +1,6 @@
 ﻿using AuthServer.Models;
 using AuthServer.Models.Session;
+using JWT.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,26 +16,32 @@ namespace AuthServer.Controllers
     [EnableCors("*", "*", "*")]
     public class AuthController : ApiController
     {
-        [Route("login")]
+        [Route("validate")]
         [HttpGet]
-        public IHttpActionResult Login(string account, string password)
+        public IHttpActionResult Validate(string token)
         {
             try
             {
-                if (string.IsNullOrEmpty(account))
+                if (string.IsNullOrEmpty(token))
                 {
-                    return Content(HttpStatusCode.OK, "Account Not Filled.");
+                    return Content(HttpStatusCode.Unauthorized, "Token Not Filled.");
                 }
 
-                if (string.IsNullOrEmpty(password))
-                {
-                    return Content(HttpStatusCode.OK, "Password Not Filled.");
-                }
-
-                UserSession.Account = account;
-                string token = new JwtManager().Generate(UserSession.SessionID);
-
-                return Content(HttpStatusCode.OK, HttpContext.Current.Session.SessionID);
+                token = HttpUtility.UrlDecode(token);
+                string content = new JwtManager().Validate(token);
+                return Content(HttpStatusCode.OK, content);
+            }
+            catch (InvalidTokenPartsException)
+            {
+                return Content(HttpStatusCode.Unauthorized, "InvaildToken.");
+            }
+            catch (TokenExpiredException)
+            {
+                return Content(HttpStatusCode.Unauthorized, "TokenExpired.");
+            }
+            catch (SignatureVerificationException)
+            {
+                return Content(HttpStatusCode.Unauthorized, "SignatureVerificationFailed.");
             }
             catch (Exception ex)
             {
