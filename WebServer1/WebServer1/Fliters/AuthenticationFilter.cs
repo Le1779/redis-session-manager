@@ -3,6 +3,7 @@
     using System;
     using System.Net.Http;
     using System.Web;
+    using System.Web.Configuration;
     using System.Web.Mvc;
     using System.Web.Mvc.Filters;
 
@@ -11,13 +12,15 @@
         public void OnAuthentication(AuthenticationContext filterContext)
         {
             var request = filterContext.HttpContext.Request;
-            
+            var authServerUrl = WebConfigurationManager.AppSettings["AuthServerUrl"];
+            var serverUrl = WebConfigurationManager.AppSettings["ServerUrl"];
+
             if (request.Cookies["Token"] != null)
             {
                 string token = request.Cookies["Token"]["Value"];
                 using (var client = new HttpClient()) 
                 {
-                    var response = client.GetAsync("https://localhost:44331/api/auth/validate?token=" + HttpUtility.UrlEncode(token));
+                    var response = client.GetAsync(authServerUrl + "api/auth/validate?token=" + HttpUtility.UrlEncode(token));
                     response.Wait();
                     var result = response.Result;
                     if (result.StatusCode != System.Net.HttpStatusCode.OK)
@@ -25,7 +28,7 @@
                         HttpCookie tokenCookie = new HttpCookie("Token");
                         tokenCookie.Expires = DateTime.Now.AddDays(-1d);
                         filterContext.HttpContext.Response.AppendCookie(tokenCookie);
-                        string redirectUrl = "https://localhost:44331/?returnUrl=http://localhost:58549/";
+                        string redirectUrl = authServerUrl + "?returnUrl=" + serverUrl;
                         filterContext.Result = new RedirectResult(redirectUrl, true);
                     }
                 }
@@ -40,7 +43,7 @@
             }
             else 
             {
-                string redirectUrl = "https://localhost:44331/?returnUrl=http://localhost:58549/";
+                string redirectUrl = authServerUrl + "?returnUrl=" + serverUrl;
                 filterContext.Result = new RedirectResult(redirectUrl, true);
             }
         }
