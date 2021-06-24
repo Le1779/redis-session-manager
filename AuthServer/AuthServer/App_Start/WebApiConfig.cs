@@ -12,7 +12,7 @@ namespace AuthServer
         public static void Register(HttpConfiguration config)
         {
             // Web API 設定和服務
-
+            config.EnableCors();
             // Web API 路由
             config.MapHttpAttributeRoutes();
 

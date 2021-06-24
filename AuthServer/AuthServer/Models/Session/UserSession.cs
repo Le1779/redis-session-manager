@@ -19,7 +19,7 @@
             }
         }
 
-        public static string Password 
+        public static string Token 
         {
             get
             {
@@ -28,6 +28,14 @@
             set
             {
                 Set(value);
+            }
+        }
+
+        public static string SessionID
+        {
+            get 
+            {
+                return HttpContext.Current.Session.SessionID;
             }
         }
 

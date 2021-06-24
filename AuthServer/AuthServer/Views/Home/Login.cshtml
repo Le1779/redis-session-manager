@@ -1,0 +1,25 @@
+﻿@model AuthServer.Models.ViewModel.LoginViewModel
+
+@{
+    Layout = null;
+}
+
+<style>
+    .center {
+        margin: auto;
+        width: 50%;
+        padding-top: 24px;
+    }
+</style>
+
+@using (Html.BeginForm("Login", "Home", new { }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.Hidden("ReturnUrl", Model.ReturnUrl)
+    <div class="center">
+        <p>Login</p>
+        @Html.EditorFor(model => model.Account, new { htmlAttributes = new { @style = "display:block;" } })
+        @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @style = "display:block;" } })
+        <button type="submit" id="submit">提交工單</button>
+    </div>
+
+}
