@@ -33,8 +33,9 @@ namespace AuthServer.Controllers
                 var conn = ConnectionMultiplexer.Connect("127.0.0.1:6379");
                 var db = conn.GetDatabase();
                 bool isExists = db.KeyExists(key);
+                var sessionToken = db.HashGet(key, "Token");
 
-                if (isExists)
+                if (isExists && !sessionToken.IsNull)
                 {
                     db.KeyExpire(key, new TimeSpan(0, 0, 20, 0));
                     return Content(HttpStatusCode.OK, "OK");
