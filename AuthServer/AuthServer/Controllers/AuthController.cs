@@ -1,11 +1,9 @@
 ﻿using AuthServer.Models;
-using AuthServer.Models.Session;
 using JWT.Exceptions;
+using Newtonsoft.Json.Linq;
+using StackExchange.Redis;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
@@ -28,8 +26,23 @@ namespace AuthServer.Controllers
                 }
 
                 token = HttpUtility.UrlDecode(token);
-                string content = new JwtManager().Validate(token);
-                return Content(HttpStatusCode.OK, content);
+                string json = new JwtManager().Validate(token);
+                dynamic data = JObject.Parse(json);
+                string key = "{/_" + data.data + "}_Data";
+
+                var conn = ConnectionMultiplexer.Connect("127.0.0.1:6379");
+                var db = conn.GetDatabase();
+                bool isExists = db.KeyExists(key);
+
+                if (isExists)
+                {
+                    db.KeyExpire(key, new TimeSpan(0, 0, 20, 0));
+                    return Content(HttpStatusCode.OK, "OK");
+                }
+                else 
+                {
+                    return Content(HttpStatusCode.Unauthorized, "Session Expired.");
+                }
             }
             catch (InvalidTokenPartsException)
             {
@@ -42,6 +55,36 @@ namespace AuthServer.Controllers
             catch (SignatureVerificationException)
             {
                 return Content(HttpStatusCode.Unauthorized, "SignatureVerificationFailed.");
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.BadRequest, ex.Message);
+            }
+        }
+
+        [Route("logout")]
+        [HttpGet]
+        public IHttpActionResult Logout(string token)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(token))
+                {
+                    return Content(HttpStatusCode.BadRequest, "Token Not Filled.");
+                }
+
+                token = HttpUtility.UrlDecode(token);
+                string json = new JwtManager().Validate(token);
+                dynamic data = JObject.Parse(json);
+                string key = "{/_" + data.data + "}_Data";
+                var conn = ConnectionMultiplexer.Connect("127.0.0.1:6379");
+                var db = conn.GetDatabase();
+                bool isExists = db.KeyExists(key);
+                if (isExists) 
+                {
+                    db.KeyDelete(key);
+                }
+                return Content(HttpStatusCode.OK, "OK");
             }
             catch (Exception ex)
             {
