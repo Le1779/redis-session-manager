@@ -184,6 +184,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\JsonSerializer.cs" />
     <Compile Include="Models\JwtManager.cs" />
     <Compile Include="Models\Session\UserSession.cs" />
     <Compile Include="Models\ViewModel\LoginViewModel.cs" />
