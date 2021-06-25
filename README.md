@@ -24,7 +24,7 @@
 假如 `ServerA` 已經走過一次登入的流程，這時候瀏覽器已經保存 `Auth Server` 的SessionId在Cookie中，所以當 `ServerB` 重新導向登入的流程，只要檢查對應的Session是否存在就可以檢查認證是否還有效。
 
 ### 登出
-透過SessionID刪除Redis中的資料
+透過SessionID刪除Redis中的資料。
 
 ## Web Server
 
@@ -32,6 +32,3 @@
 - 接收 `Auth Server` 回傳的 `Token`。
 - 將 `Token` 保存在 `Cookie` 中，在之後的訪問都帶上。
 - 每次都會跟`Auth Server` 檢查 `Token` 是否合法。
-
-## TODO
-- 登出
